@@ -41,12 +41,13 @@ free-rtos/
   bsp/
     startup.s
     linker.ld
-    uart.c
-    uart.h
+    uart.c / uart.h
+    irq.c / irq.h           # dedicated IRQ labs may handle
     hooks.c                 # assert / malloc-failed / stack-overflow hooks
     FreeRTOSConfig.default.h
   third_party/
     FreeRTOS-Kernel/        # one LTS snapshot, all labs link this
+    cmsis/                  # CMSIS-Core + STM32F405 device headers (NVIC, IRQn). Not STM32Cube HAL.
   labs/
     NN-slug/
       README.md
@@ -78,10 +79,26 @@ If a binary is missing after install, the script exits non-zero and names the pa
 ### QEMU machine
 
 - Machine: `netduinoplus2` (STM32F405, Cortex-M4F with FPU).
-- Used: UART to stdio, SysTick, NVIC, one software/unused IRQ for ISR labs.
-- Not used: Ethernet, USB, on-board sensors, extra HALs.
+- Used: UART to stdio, SysTick, NVIC, one dedicated device IRQ for ISR labs.
+- Not used: Ethernet, USB, sensors, **STM32Cube HAL** (`HAL_UART_*`, `HAL_GPIO_*`, `HAL_Init`).
 
 Labs must not depend on hardware QEMU does not model.
+
+### BSP API (what labs may call)
+
+This is the “HAL” for exercises: a **tiny stable API in `bsp/`**, plus CMSIS `NVIC_*` / `IRQn` types. Labs never vendor Cube HAL.
+
+| API | Use in labs |
+|-----|-------------|
+| `uart_puts` / `uart_printf` | All labs: UART output |
+| `bsp_irq_init(priority)` | Enable the dedicated IRQ at an NVIC priority |
+| `bsp_irq_pend(void)` | Pend that IRQ from a task (so QEMU actually enters the handler) |
+| `void BSP_IRQHandler(void)` | **You implement this** in `app.c` (weak default in BSP does nothing). ISR labs put `xQueueSendFromISR` / `portYIELD_FROM_ISR` here |
+| CMSIS `NVIC_SetPriority` / `NVIC_EnableIRQ` | Lab 15 (syscall priority) may use these directly to mis-configure then fix |
+
+SysTick is owned by the FreeRTOS port. Labs must not define `SysTick_Handler`.
+
+Startup provides a weak `BSP_IRQHandler` alias to a real unused STM32 vector that QEMU will take when pending (e.g. `EXTI0_IRQHandler`). Implementation picks one IRQn documented in `bsp/irq.h`.
 
 ### Image
 
@@ -142,7 +159,7 @@ Phase 1 also has `expected.log` (stable lines, no jittery timestamps).
 | 2 Issues | Compiles and **misbehaves**; learner patches `src/` | Symptom in README gone; GDB notes; no golden log |
 | 3 Internals | Read kernel/port; small from-scratch or annotation | README “done when”; GDB notes |
 
-Print only through BSP UART helpers. Native FreeRTOS API only.
+Labs may use the FreeRTOS API and the BSP API above. No STM32Cube HAL in `src/` or `solution/`.
 
 ## Firmware hooks and asserts
 
@@ -237,6 +254,6 @@ v1 is done when:
 
 ## Non-goals
 
-- A general STM32 HAL course
+- STM32Cube HAL / a general STM32 peripheral course (CMSIS device headers + `bsp/` only)
 - Production product firmware
 - Teaching QEMU internals beyond “run this machine and attach GDB”
