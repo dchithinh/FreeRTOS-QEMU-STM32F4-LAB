@@ -6,3 +6,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/FreeRTOS.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/AddLab.cmake)
 
 add_freertos_lab(01 tasks)
+add_freertos_lab(02 timing)
+add_freertos_lab(03 queues)
+add_freertos_lab(04 semaphores)
