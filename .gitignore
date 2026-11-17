@@ -1,1 +1,7 @@
 .worktrees/
+build/
+.cache/
+*.elf
+*.bin
+*.map
+*.o
