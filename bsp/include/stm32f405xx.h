@@ -5,12 +5,15 @@
 #define __IO volatile
 
 #define EXTI0_IRQn   6
+#define USART1_IRQn  37
 #define USART2_IRQn  38
 
+#define USART1_BASE  0x40011000UL
 #define USART2_BASE  0x40004400UL
 #define RCC_BASE     0x40023800UL
 
 #define RCC_APB1ENR_USART2EN (1UL << 17)
+#define RCC_APB2ENR_USART1EN (1UL << 4)
 
 typedef struct {
     __IO uint32_t SR;
@@ -45,6 +48,7 @@ typedef struct {
     __IO uint32_t APB2ENR;
 } RCC_TypeDef;
 
+#define USART1 ((USART_TypeDef *)USART1_BASE)
 #define USART2 ((USART_TypeDef *)USART2_BASE)
 #define RCC    ((RCC_TypeDef *)RCC_BASE)
 
