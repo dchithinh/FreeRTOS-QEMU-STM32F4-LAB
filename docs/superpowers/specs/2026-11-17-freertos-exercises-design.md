@@ -20,7 +20,7 @@ A later track (MPU, tickless idle, +TCP/+FAT, tracing) is explicitly **out of v1
 
 **Shared board support + numbered labs** (not one mega-firmware, not a full kernel copy per lab).
 
-- One BSP, one vendored FreeRTOS-Kernel LTS tree, one Makefile entry point.
+- One BSP, one vendored FreeRTOS-Kernel LTS tree, one **CMake** project (Ninja).
 - Each lab may overlay `FreeRTOSConfig.h`.
 - Work happens in `labs/NN-slug/src/`. Answers live in `labs/NN-slug/solution/`.
 
@@ -29,9 +29,13 @@ A later track (MPU, tickless idle, +TCP/+FAT, tracing) is explicitly **out of v1
 ```text
 free-rtos/
   README.md
-  Makefile                  # make lab / qemu / solution / check / gdb  L=NN
+  CMakeLists.txt            # labs as targets; qemu / check / gdb custom targets
+  cmake/
+    gcc-arm-none-eabi.cmake # toolchain file
+    FreeRTOS.cmake
   scripts/
-    install-env.sh          # Ubuntu/WSL2 toolchain + QEMU
+    install-env.sh          # Ubuntu/WSL2: cmake, ninja, gcc-arm-none-eabi, qemu, gdb
+    lab.sh                  # ./scripts/lab.sh qemu 01  (configure if needed, then build/run)
     run-qemu.sh
     check-uart.sh           # Phase 1: UART vs expected.log
   bsp/
@@ -40,7 +44,6 @@ free-rtos/
     uart.c
     uart.h
     hooks.c                 # assert / malloc-failed / stack-overflow hooks
-    qemu-stm32f4.mk
     FreeRTOSConfig.default.h
   third_party/
     FreeRTOS-Kernel/        # one LTS snapshot, all labs link this
@@ -56,7 +59,7 @@ free-rtos/
   build/                    # gitignored
 ```
 
-Root `README.md` tells the reader: run `scripts/install-env.sh`, then `make qemu L=01`.
+Root `README.md` tells the reader: run `scripts/install-env.sh`, then `./scripts/lab.sh qemu 01`.
 
 ## Environment and target
 
@@ -64,12 +67,13 @@ Root `README.md` tells the reader: run `scripts/install-env.sh`, then `make qemu
 
 WSL2 Linux (Ubuntu packages). `scripts/install-env.sh` installs and then **verifies**:
 
+- `cmake` (3.20+)
+- `ninja`
 - `arm-none-eabi-gcc`
 - `gdb-multiarch` (or `arm-none-eabi-gdb` if that is what the distro provides)
 - `qemu-system-arm`
-- `make`
 
-If a binary is missing after install, the script exits non-zero and names the package. **No Docker in v1.**
+If a binary is missing after install, the script exits non-zero and names the package. **No Docker in v1.** GNU Make is not required.
 
 ### QEMU machine
 
@@ -85,16 +89,27 @@ Labs must not depend on hardware QEMU does not model.
 - Heap: `heap_4` in the BSP heap region.
 - `configCPU_CLOCK_HZ` and `configTICK_RATE_HZ` (1000 Hz) are fixed in the default config unless a lab overlay changes them.
 
-### Make targets
+### Build and run
 
-| Target | Meaning |
+CMake is the build system of record. A toolchain file selects `arm-none-eabi-gcc`. Generator: **Ninja**. Out-of-tree build directory: `build/` (gitignored).
+
+Each lab is two firmware targets (ELF + `.bin`):
+
+- `lab_NN` — learner `src/`
+- `lab_NN_solution` — `solution/`
+
+Custom targets wrap QEMU/GDB. Day-to-day command is `scripts/lab.sh` so you do not type generator flags:
+
+| Command | Meaning |
 |--------|---------|
-| `make qemu L=NN` | Build `labs/NN-*/src`, boot QEMU, UART on stdio |
-| `make solution L=NN` | Same using `solution/` |
-| `make check L=NN` | Phase 1 only: UART vs `expected.log` |
-| `make gdb L=NN` | QEMU `-s -S` plus GDB; lab README lists breakpoints |
+| `./scripts/lab.sh qemu 01` | Configure if needed, build `lab_01`, boot QEMU, UART on stdio |
+| `./scripts/lab.sh solution 01` | Same using `lab_01_solution` |
+| `./scripts/lab.sh check 01` | Phase 1 only: UART vs `expected.log` |
+| `./scripts/lab.sh gdb 15` | QEMU `-s -S` plus GDB; lab README lists breakpoints |
 
-`L` is the numeric prefix (`01`, `15`, …). The Makefile resolves `labs/NN-*`.
+`01` is the numeric prefix. The script resolves `labs/01-*`. Equivalent CMake: `cmake --build build --target qemu-01`.
+
+No root `Makefile`. Lab READMEs document `./scripts/lab.sh`, not Make.
 
 Every lab prints a final UART line `DONE` so `check-uart.sh` can time out if QEMU hangs.
 
@@ -123,7 +138,7 @@ Phase 1 also has `expected.log` (stable lines, no jittery timestamps).
 
 | Phase | `src/` | Check |
 |-------|--------|--------|
-| 1 APIs | Stubs / TODOs | `make check` UART golden log |
+| 1 APIs | Stubs / TODOs | `./scripts/lab.sh check NN` UART golden log |
 | 2 Issues | Compiles and **misbehaves**; learner patches `src/` | Symptom in README gone; GDB notes; no golden log |
 | 3 Internals | Read kernel/port; small from-scratch or annotation | README “done when”; GDB notes |
 
@@ -194,12 +209,12 @@ Lab 09: UART story uses **one** writer and **one** reader. The “two writers”
 
 ## Testing
 
-- **Automated in v1:** Phase 1 `make check` only (UART `diff`).
+- **Automated in v1:** Phase 1 `./scripts/lab.sh check NN` only (UART `diff`).
 - **Manual:** Phase 2–3 against README symptoms; GDB optional but documented.
 - **CI (optional later):** Phase 1 checks only. Not required to ship v1.
 - **Not in v1:** Unity/CMock, host FreeRTOS POSIX port tests, real Nucleo/STM32 hardware jobs.
 
-`make check` fails on log mismatch or if `DONE` never appears (timeout).
+`./scripts/lab.sh check NN` fails on log mismatch or if `DONE` never appears (timeout).
 
 ## Out of v1
 
@@ -215,9 +230,9 @@ Lab 09: UART story uses **one** writer and **one** reader. The “two writers”
 v1 is done when:
 
 1. `scripts/install-env.sh` succeeds on Ubuntu/WSL2 and the four binaries exist.
-2. `make qemu L=01` prints UART including `DONE`.
+2. `./scripts/lab.sh qemu 01` prints UART including `DONE`.
 3. All 28 labs exist with the folder contract and solution trees.
-4. All Phase 1 labs pass `make check L=NN` using **solution** builds (proves goldens).
+4. All Phase 1 labs pass `./scripts/lab.sh check NN` using **solution** builds (proves goldens).
 5. Each README has Why / Memorize / Job / Run / Done when (and GDB for Phase 2–3).
 
 ## Non-goals
