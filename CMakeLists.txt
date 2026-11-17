@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(freertos_labs C ASM)
 
 add_subdirectory(bsp)
+include(${CMAKE_SOURCE_DIR}/cmake/FreeRTOS.cmake)
 
 add_executable(uart_smoke labs/_uart_smoke/main.c)
 target_link_libraries(uart_smoke PRIVATE bsp)
