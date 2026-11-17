@@ -28,7 +28,7 @@ int main(void)
     count_sem = xSemaphoreCreateCounting(2, 0);
     xSemaphoreGive(count_sem);
     xSemaphoreGive(count_sem);
-    xTaskCreate(taker, "t1", configMINIMAL_STACK_SIZE * 2, NULL, 2, NULL);
+    xTaskCreate(taker, "t1", configMINIMAL_STACK_SIZE * 2, NULL, 3, NULL);
     xTaskCreate(taker, "t2", configMINIMAL_STACK_SIZE * 2, NULL, 2, NULL);
     xTaskCreate(done_task, "d", configMINIMAL_STACK_SIZE * 2, NULL, 1, NULL);
     vTaskStartScheduler();

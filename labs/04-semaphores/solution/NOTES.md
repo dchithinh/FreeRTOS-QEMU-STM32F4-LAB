@@ -6,7 +6,7 @@
 
 ## Order of `took` lines
 
-Both taker tasks share the same priority; either may print first. `expected.log` lists two `took` lines then `DONE`; the checker compares the full UART capture as a set of lines in order — with equal priority and preload, both takes complete before `done_task`’s 100 ms delay elapses.
+`t1` runs at priority 3 and `t2` at priority 2 so each `uart_puts` completes without interleaving (see `bsp/uart.c` critical section). Either taker may print first depending on ready order; `expected.log` is two `took` lines then `DONE`. Both takes finish before `done_task`’s 100 ms delay.
 
 ## Why not binary?
 

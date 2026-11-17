@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "FreeRTOS.h"
+#include "task.h"
 #include "stm32f405xx.h"
 
 void uart_init(void)
@@ -17,11 +19,13 @@ void uart_init(void)
 
 void uart_puts(const char *s)
 {
+    taskENTER_CRITICAL();
     while (*s) {
         while ((USART1->SR & USART_SR_TXE) == 0U) {
         }
         USART1->DR = (uint32_t)(uint8_t)*s++;
     }
+    taskEXIT_CRITICAL();
 }
 
 void uart_printf(const char *fmt, ...)
