@@ -2,11 +2,14 @@ add_library(bsp STATIC
     startup.s
     system_stm32f4xx.c
     uart.c
+    irq.c
+    hooks.c
 )
 
 target_include_directories(bsp PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/third_party/cmsis/Include
 )
 
 target_compile_options(bsp PRIVATE -Wall -Wextra)
