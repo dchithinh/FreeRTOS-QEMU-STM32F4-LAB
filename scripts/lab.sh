@@ -6,7 +6,7 @@ if [[ $# -lt 2 ]]; then
   exit 1
 fi
 CMD=$1
-ID=$(printf '%02d' "$2")
+ID=$(printf '%02d' "$((10#$2))")
 shopt -s nullglob
 lab_dirs=("$ROOT/labs/${ID}-"*)
 shopt -u nullglob
