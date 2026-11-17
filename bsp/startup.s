@@ -14,6 +14,9 @@
 .extern _estack
 .extern SystemInit
 .extern main
+.extern vPortSVCHandler
+.extern xPortPendSVHandler
+.extern xPortSysTickHandler
 
 .section .isr_vector,"a",%progbits
 .type g_pfnVectors, %object
@@ -29,11 +32,11 @@ g_pfnVectors:
     .word 0
     .word 0
     .word 0
-    .word SVC_Handler
+    .word vPortSVCHandler
     .word DebugMon_Handler
     .word 0
-    .word PendSV_Handler
-    .word SysTick_Handler
+    .word xPortPendSVHandler
+    .word xPortSysTickHandler
     /* External IRQ 0..81 (STM32F405); IRQ6 = EXTI0 -> BSP_IRQHandler */
     .word WWDG_IRQHandler
     .word PVD_IRQHandler
@@ -177,10 +180,7 @@ def_irq_handler HardFault_Handler
 def_irq_handler MemManage_Handler
 def_irq_handler BusFault_Handler
 def_irq_handler UsageFault_Handler
-def_irq_handler SVC_Handler
 def_irq_handler DebugMon_Handler
-def_irq_handler PendSV_Handler
-def_irq_handler SysTick_Handler
 def_irq_handler WWDG_IRQHandler
 def_irq_handler PVD_IRQHandler
 def_irq_handler TAMP_STAMP_IRQHandler

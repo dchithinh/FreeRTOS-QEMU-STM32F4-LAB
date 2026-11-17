@@ -4,7 +4,7 @@ function(add_freertos_lab ID SLUG)
   add_executable(lab_${ID}_solution ${LAB_DIR}/solution/app.c)
   foreach(tgt lab_${ID} lab_${ID}_solution)
     target_include_directories(${tgt} PRIVATE ${LAB_DIR} ${CMAKE_SOURCE_DIR}/bsp/include)
-    target_link_libraries(${tgt} PRIVATE bsp freertos_kernel)
+    target_link_libraries(${tgt} PRIVATE freertos_kernel bsp)
     target_link_options(${tgt} PRIVATE -T${CMAKE_SOURCE_DIR}/bsp/linker.ld "-Wl,-Map=$<TARGET_FILE_DIR:${tgt}>/${tgt}.map")
   endforeach()
   add_custom_target(qemu-${ID}

@@ -18,7 +18,7 @@ TIMEOUT=8
 set +e
 timeout --signal=KILL "${TIMEOUT}s" "$QEMU" -M netduinoplus2 -display none -serial stdio -kernel "$ELF" >"$OUT" 2>&1
 set -e
-if ! grep -q '^DONE$' "$OUT"; then
+if ! tr -d '\r' <"$OUT" | grep -q '^DONE$'; then
   echo "timeout or missing DONE" >&2
   cat "$OUT" >&2
   rm -f "$OUT"
