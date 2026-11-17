@@ -12,7 +12,7 @@ Stack overruns corrupt TCBs and crash later in unrelated code. `configCHECK_FOR_
 
 ## Your job
 
-Shipped `src/app.c` allocates a multi-kB buffer on a minimal stack. Symptom:
+Shipped `src/app.c` runs `heavy` with `configMINIMAL_STACK_SIZE` words, recurses a few frames with 80-byte locals, blocks in `vTaskDelay`, and lets **method 2** invoke the hook (no app-side call). Symptom:
 
 1. `HOOK STACK_OVERFLOW`
 2. hang (no `DONE`)

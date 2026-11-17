@@ -4,21 +4,22 @@
 
 static void blow_stack(uint32_t depth)
 {
-    volatile uint8_t frame[64];
+    volatile uint8_t frame[80];
 
-    frame[0] = (uint8_t)depth;
-    if (depth < 6U) {
-        blow_stack(depth + 1U);
-    } else {
-        /* Deep locals on minimal stack — same hook as configCHECK (bsp/hooks.c). */
-        vApplicationStackOverflowHook(NULL, "heavy");
+    for (uint32_t i = 0; i < sizeof frame; i++) {
+        frame[i] = (uint8_t)depth;
     }
+    if (depth < 3U) {
+        blow_stack(depth + 1U);
+    }
+    /* Deepest call overwrites the method-2 canary; blocking forces a context switch. */
+    vTaskDelay(portMAX_DELAY);
 }
 
 static void heavy_task(void *arg)
 {
     (void)arg;
-    blow_stack(0);
+    blow_stack(0U);
     uart_puts("DONE\r\n");
     vTaskDelete(NULL);
 }
