@@ -6,9 +6,9 @@ static void tick_task(void *arg)
 {
     (void)arg;
 
-    /* TODO: vTaskDelay(5), then print tick count and DONE (see README) */
+    /* TODO: xTaskGetTickCount before/after vTaskDelay(5); print tick <elapsed> and DONE */
     for (;;) {
-        vTaskDelay(1000);
+        vTaskDelay(5);
     }
 }
 

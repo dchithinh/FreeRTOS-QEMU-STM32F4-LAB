@@ -14,8 +14,8 @@ Hardware SysTick drives the RTOS clock. Each interrupt bumps `xTickCount` throug
 
 Edit `labs/26-systick-tick/src/app.c`. A low-priority task should:
 
-1. `vTaskDelay(5)`
-2. Print `tick <n>` where `<n>` is how many ticks elapsed across `vTaskDelay(5)` (expect `5`)
+1. Record `xTaskGetTickCount()`, then `vTaskDelay(5)`
+2. Subtract the tick count from `xTaskGetTickCount()` after the delay; print `tick <n>` (expect `5`, ±1)
 3. Print `DONE`
 
 ## How to run

@@ -36,5 +36,5 @@ The solution overlay lives in `solution/FreeRTOSConfig.h` for reference.
 
 1. `break vApplicationIdleHook` — confirm it fires only when the ready lists are empty except idle.
 2. `break prvIdleTask` in `tasks.c` — step into the hook call path.
-3. Watch `idle_wait_task`: it blocks on `vTaskDelay` while `fpu`/CPU work is absent; hook sets your flag.
+3. Watch `idle_wait_task`: it blocks on `vTaskDelay` while no other application task is ready; hook sets your flag.
 4. `info tasks` when stalled — idle should run at priority 0.

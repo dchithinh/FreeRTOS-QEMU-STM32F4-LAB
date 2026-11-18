@@ -23,14 +23,19 @@ static void uart_put_u32(uint32_t v)
 
 static void tick_task(void *arg)
 {
-    TickType_t t;
+    TickType_t before;
+    TickType_t after;
+    TickType_t elapsed;
 
     (void)arg;
 
-    t = xTaskGetTickCount();
-    vTaskDelayUntil(&t, 5);
+    before = xTaskGetTickCount();
+    vTaskDelay(5);
+    after = xTaskGetTickCount();
+    elapsed = after - before;
+
     uart_puts("tick ");
-    uart_put_u32(5U);
+    uart_put_u32((uint32_t)elapsed);
     uart_puts("\r\n");
     uart_puts("DONE\r\n");
     vTaskDelete(NULL);
