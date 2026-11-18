@@ -9,6 +9,7 @@ Study material lives in each lab **README**. Answers live in **`solution/`** nex
 On Ubuntu / WSL2:
 
 ```bash
+git submodule update --init --recursive
 ./scripts/install-env.sh
 ```
 
@@ -95,4 +96,4 @@ Headers: `bsp/uart.h`, `bsp/irq.h`.
 - **Phase 2:** broken `src/` — fix until README symptoms are gone; use GDB notes in the lab README.
 - **Phase 3:** read kernel/port paths in the README; small exercises; GDB notes where listed.
 
-Kernel: vendored **FreeRTOS-Kernel LTS** under `third_party/`, **heap_4**, CM4F port. Details: `docs/superpowers/specs/2026-11-17-freertos-exercises-design.md`.
+Kernel: **FreeRTOS-Kernel V11.1.0** git submodule at `third_party/FreeRTOS-Kernel`, **heap_4**, CM4F port. Details: `docs/superpowers/specs/2026-11-17-freertos-exercises-design.md`.

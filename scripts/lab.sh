@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
+KERNEL_TASKS="$ROOT/third_party/FreeRTOS-Kernel/tasks.c"
+if [[ ! -f "$KERNEL_TASKS" ]]; then
+  echo "FreeRTOS kernel not found: $KERNEL_TASKS" >&2
+  echo "Run: git submodule update --init --recursive" >&2
+  exit 1
+fi
 if [[ $# -lt 2 ]]; then
   echo "usage: $0 qemu|solution|check|gdb NN" >&2
   exit 1

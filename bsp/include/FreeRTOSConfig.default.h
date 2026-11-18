@@ -1,6 +1,6 @@
 #pragma once
 
-#define configCPU_CLOCK_HZ                         16000000
+#define configCPU_CLOCK_HZ                         168000000
 #define configTICK_RATE_HZ                         1000
 #define configMAX_PRIORITIES                       7
 #define configMINIMAL_STACK_SIZE                   128

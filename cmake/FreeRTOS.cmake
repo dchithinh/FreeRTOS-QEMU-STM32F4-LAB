@@ -1,4 +1,10 @@
 set(FREERTOS_KERNEL_DIR ${CMAKE_SOURCE_DIR}/third_party/FreeRTOS-Kernel)
+set(FREERTOS_KERNEL_TASKS_C ${FREERTOS_KERNEL_DIR}/tasks.c)
+if(NOT EXISTS "${FREERTOS_KERNEL_TASKS_C}")
+    message(FATAL_ERROR
+        "FreeRTOS kernel not found: ${FREERTOS_KERNEL_TASKS_C}\n"
+        "Run: git submodule update --init --recursive")
+endif()
 
 set(FREERTOS_KERNEL_SOURCES
     ${FREERTOS_KERNEL_DIR}/tasks.c
