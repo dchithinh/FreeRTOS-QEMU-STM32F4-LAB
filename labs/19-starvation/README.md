@@ -10,11 +10,11 @@ Equal-priority tasks only **time-slice** when `configUSE_TIME_SLICING` is 1. A C
 - `configUSE_TIME_SLICING 1` — the kernel round-robins among equal ready priorities on each tick.
 - Fixes: enable slicing, stagger priorities, or add `vTaskDelay` / blocking I/O in the hog task.
 
-This lab’s `FreeRTOSConfig.h` sets `configUSE_TIME_SLICING` to `0`.
+This lab’s `FreeRTOSConfig.h` sets `configUSE_TIME_SLICING` to `0`. The kernel for each lab ELF is built with that lab’s config overlay.
 
 ## Your job
 
-Shipped `src/app.c` runs `spin` at priority 3 and `fair` at priority 2; `spin` never blocks. Symptom: UART never prints `fair` or `DONE`.
+Shipped `src/app.c` creates `spin` before `fair`, both at priority 2; `spin` never blocks. With time slicing off, `spin` never yields. Symptom: UART never prints `fair` or `DONE`.
 
 Edit `labs/19-starvation/src/app.c` (or `FreeRTOSConfig.h`) so UART prints:
 
@@ -34,7 +34,7 @@ Edit `labs/19-starvation/src/app.c` (or `FreeRTOSConfig.h`) so UART prints:
 
 ## GDB
 
-1. `break vTaskSwitchContext` — with the bug, only `spin` ever runs at priority 2.
-2. Inspect `pxReadyTasksLists[2]` — `fair` stays ready but never selected.
+1. `break vTaskSwitchContext` — with the bug, only `spin` runs among the two equal-priority tasks.
+2. Inspect `pxReadyTasksLists[2]` — `fair` stays ready but is never selected while time slicing is off.
 3. After fix, confirm `fair` runs and hits `uart_puts`.
-4. Optionally set a watchpoint on the idle hook tick count to see time-slice behavior if you enable slicing.
+4. Optionally set a watchpoint on the idle hook tick count to see time-slice behavior when you enable slicing.

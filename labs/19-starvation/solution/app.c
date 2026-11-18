@@ -11,7 +11,6 @@ static void spin_task(void *arg)
         while (spin < 100000U) {
             spin++;
         }
-        vTaskDelay(1);
     }
 }
 
@@ -27,8 +26,8 @@ int main(void)
 {
     uart_init();
 
+    xTaskCreate(spin_task, "spin", configMINIMAL_STACK_SIZE * 2, NULL, 2, NULL);
     xTaskCreate(fair_task, "fair", configMINIMAL_STACK_SIZE * 2, NULL, 2, NULL);
-    xTaskCreate(spin_task, "spin", configMINIMAL_STACK_SIZE * 2, NULL, 3, NULL);
     vTaskStartScheduler();
     for (;;) {
     }

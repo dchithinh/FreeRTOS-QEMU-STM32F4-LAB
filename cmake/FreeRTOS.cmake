@@ -1,6 +1,6 @@
 set(FREERTOS_KERNEL_DIR ${CMAKE_SOURCE_DIR}/third_party/FreeRTOS-Kernel)
 
-add_library(freertos_kernel STATIC
+set(FREERTOS_KERNEL_SOURCES
     ${FREERTOS_KERNEL_DIR}/tasks.c
     ${FREERTOS_KERNEL_DIR}/queue.c
     ${FREERTOS_KERNEL_DIR}/list.c
@@ -11,22 +11,24 @@ add_library(freertos_kernel STATIC
     ${FREERTOS_KERNEL_DIR}/portable/MemMang/heap_4.c
 )
 
-target_include_directories(freertos_kernel PUBLIC
-    ${FREERTOS_KERNEL_DIR}/include
-    ${FREERTOS_KERNEL_DIR}/portable/GCC/ARM_CM4F
-    ${CMAKE_SOURCE_DIR}/bsp/include
-    ${CMAKE_SOURCE_DIR}/third_party/cmsis/Include
-)
+function(add_freertos_kernel_library LIB_NAME CONFIG_INCLUDE_DIR)
+    add_library(${LIB_NAME} STATIC ${FREERTOS_KERNEL_SOURCES})
 
-# Labs supply FreeRTOSConfig.h on their targets (PUBLIC not used). PRIVATE config
-# is only for compiling this static library and bsp hook objects.
-target_include_directories(freertos_kernel PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/freertos_kernel_build
-)
+    target_include_directories(${LIB_NAME} PUBLIC
+        ${FREERTOS_KERNEL_DIR}/include
+        ${FREERTOS_KERNEL_DIR}/portable/GCC/ARM_CM4F
+        ${CMAKE_SOURCE_DIR}/bsp/include
+        ${CMAKE_SOURCE_DIR}/third_party/cmsis/Include
+    )
 
-target_compile_options(freertos_kernel PRIVATE -Wall -Wextra)
+    # FreeRTOSConfig.h for this lab/solution must be found before the default.
+    target_include_directories(${LIB_NAME} PRIVATE
+        ${CONFIG_INCLUDE_DIR}
+    )
 
-# bsp/hooks.c needs FreeRTOS types; labs link freertos_kernel explicitly.
+    target_compile_options(${LIB_NAME} PRIVATE -Wall -Wextra)
+endfunction()
+
 target_include_directories(bsp PRIVATE
     ${FREERTOS_KERNEL_DIR}/include
     ${FREERTOS_KERNEL_DIR}/portable/GCC/ARM_CM4F
