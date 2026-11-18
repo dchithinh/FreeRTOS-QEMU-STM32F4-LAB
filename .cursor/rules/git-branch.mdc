@@ -1,5 +1,5 @@
 ---
-description: Stay on the current git branch; the user switches branches
+description: Stay on the current git branch; the user switches branches and pushes
 alwaysApply: true
 ---
 
@@ -9,3 +9,4 @@ alwaysApply: true
 - Do not create a new branch (`git checkout -b`, `git switch -c`, `git worktree add -b`) unless the user explicitly asks.
 - If another branch is needed, tell the user and wait. They will switch.
 - Do not rewrite history or force-push unless the user explicitly asks.
+- Do not `git push` (or push to origin/upstream). The user pushes themselves.
