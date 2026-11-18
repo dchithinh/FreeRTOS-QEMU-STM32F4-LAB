@@ -13,6 +13,8 @@ FreeRTOS is task-centric: you split work into concurrent tasks and let the sched
 - `vTaskSuspend` / `vTaskResume` remove a task from scheduling without deleting it.
 - `vTaskDelete` frees a task’s kernel objects; call only when the task must not run again.
 - `vTaskStartScheduler()` never returns on success; if it does, the idle/timer tasks could not be created — usually **heap too small** (`configTOTAL_HEAP_SIZE`).
+- **A task function must never return.** There is no caller to return to. Returning lands in `prvTaskExitError()` (port `port.c`): interrupts stay off and the CPU spins forever, so every other task stops. End every task with an infinite loop, or call `vTaskDelete(NULL)` last.
+- `vTaskDelete` takes the handle itself: `vTaskDelete(dummy_h)`, **not** `vTaskDelete(&dummy_h)`.
 
 This lab uses task notifications only to order UART lines deterministically; notifications are not on the memorize list for the exam-style takeaway.
 

@@ -67,6 +67,14 @@ You may also use CMSIS **`NVIC_*`** and **`IRQn_Type`** (e.g. lab 15). **Do not*
 
 Headers: `bsp/uart.h`, `bsp/irq.h`.
 
+## Rules that break the kernel
+
+- **A task function must never return.** FreeRTOS has no return address for a task; falling off the end runs `prvTaskExitError()` (interrupts off, infinite spin), so every task stops and UART goes silent. End with `for (;;)`, or `vTaskDelete(NULL)` as the last statement.
+- **Pass handles, not addresses of handles:** `vTaskDelete(h)`, `xTaskNotifyGive(h)` — `&h` is a `TaskHandle_t *` and corrupts memory.
+- **Never call a non-`FromISR` API from an ISR** (labs 14–15 show the failure).
+- **Do not block in a timer callback** (lab 21): the timer daemon task serves every timer.
+- **Do not define `SysTick_Handler`** — the FreeRTOS port owns SysTick.
+
 ## Lab index (28 labs)
 
 | ID | Slug | Phase |
