@@ -15,6 +15,14 @@ git submodule update --init --recursive
 
 That script installs and verifies `cmake` (3.20+), `ninja`, `arm-none-eabi-gcc`, `gdb-multiarch` (or `arm-none-eabi-gdb`), and `qemu-system-arm`.
 
+Labs need **QEMU 5 or newer** (`-M netduinoplus2`). Ubuntu 20.04’s package is 4.2 and will fail with `unsupported machine type`. Then:
+
+```bash
+./scripts/install-qemu.sh
+```
+
+That script copies or points at a QEMU that supports the board (into gitignored `.tools/bin`). Override with `FREERTOS_QEMU=/path/to/qemu-system-arm`.
+
 Configure and try lab 01:
 
 ```bash
@@ -25,7 +33,7 @@ CMake uses **Ninja** and an out-of-tree `build/` directory (gitignored). Toolcha
 
 ## QEMU and UART
 
-- Machine: **`netduinoplus2`** (STM32F405, Cortex-M4F).
+- Machine: **`netduinoplus2`** (STM32F405, Cortex-M4F). Requires QEMU 5+.
 - QEMU serial: **`-display none -serial stdio`** (see `scripts/run-qemu.sh`).
 - Firmware talks on **USART1**; QEMU wires serial port 0 to your terminal. The BSP sets this up in `bsp/uart.c` (register-level, not Cube HAL).
 

@@ -20,4 +20,12 @@ fi
 cmake --version | head -1
 arm-none-eabi-gcc --version | head -1
 qemu-system-arm --version | head -1
+# Ubuntu 20.04 qemu 4.2 has no netduinoplus2 (need QEMU 5+).
+# shellcheck source=qemu-env.sh
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+source "$ROOT/scripts/qemu-env.sh"
+if ! find_freertos_qemu >/dev/null; then
+  echo "qemu-system-arm is too old for -M netduinoplus2. Run: ./scripts/install-qemu.sh" >&2
+  exit 1
+fi
 echo "env OK"

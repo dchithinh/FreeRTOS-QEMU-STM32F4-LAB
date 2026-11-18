@@ -20,16 +20,9 @@ if [[ ${#lab_dirs[@]} -eq 0 ]]; then
   echo "lab ${ID} not found (expected $ROOT/labs/${ID}-*)" >&2
   exit 1
 fi
-if command -v qemu-system-arm >/dev/null 2>&1; then
-  QEMU=qemu-system-arm
-elif [[ -x "$ROOT/.tools/bin/qemu-system-arm" ]]; then
-  QEMU="$ROOT/.tools/bin/qemu-system-arm"
-elif [[ -x /tmp/qemu-8.2.2/build/qemu-system-arm ]]; then
-  QEMU=/tmp/qemu-8.2.2/build/qemu-system-arm
-else
-  echo "qemu-system-arm not found (PATH, $ROOT/.tools/bin, or /tmp/qemu-8.2.2/build)" >&2
-  exit 1
-fi
+# shellcheck source=qemu-env.sh
+source "$ROOT/scripts/qemu-env.sh"
+QEMU=$(find_freertos_qemu)
 if [[ ! -d "$ROOT/build" ]]; then
   cmake -B "$ROOT/build" -G Ninja -DCMAKE_TOOLCHAIN_FILE="$ROOT/cmake/gcc-arm-none-eabi.cmake" -S "$ROOT"
 fi
@@ -44,7 +37,7 @@ case $CMD in
       echo "ELF not found for lab_${ID}" >&2
       exit 1
     fi
-    "$QEMU" -M netduinoplus2 -display none -serial stdio -s -S -kernel "$ELF" &
+    "$QEMU" -M "$FREERTOS_QEMU_MACHINE" -display none -serial stdio -s -S -kernel "$ELF" &
     QPID=$!
     trap 'kill $QPID 2>/dev/null || true' EXIT
     GDB=$(command -v gdb-multiarch || command -v arm-none-eabi-gdb)
