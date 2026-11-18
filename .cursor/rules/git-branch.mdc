@@ -1,0 +1,11 @@
+---
+description: Stay on the current git branch; the user switches branches
+alwaysApply: true
+---
+
+# Git branch
+
+- Make all edits and commits on the **current branch**.
+- Do not create a new branch (`git checkout -b`, `git switch -c`, `git worktree add -b`) unless the user explicitly asks.
+- If another branch is needed, tell the user and wait. They will switch.
+- Do not rewrite history or force-push unless the user explicitly asks.
