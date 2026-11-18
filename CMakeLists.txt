@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 project(freertos_labs C ASM)
 
+# Debug build by default so every lab and solution can be inspected in GDB.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+
 add_subdirectory(bsp)
 include(${CMAKE_SOURCE_DIR}/cmake/FreeRTOS.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/AddLab.cmake)

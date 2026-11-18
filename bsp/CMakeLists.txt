@@ -16,4 +16,4 @@ target_include_directories(bsp PRIVATE
     ${CMAKE_SOURCE_DIR}/cmake/freertos_kernel_build
 )
 
-target_compile_options(bsp PRIVATE -Wall -Wextra)
+target_compile_options(bsp PRIVATE -Wall -Wextra -g3 -gdwarf-4)

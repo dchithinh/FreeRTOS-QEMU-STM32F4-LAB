@@ -32,7 +32,7 @@ function(add_freertos_kernel_library LIB_NAME CONFIG_INCLUDE_DIR)
         ${CONFIG_INCLUDE_DIR}
     )
 
-    target_compile_options(${LIB_NAME} PRIVATE -Wall -Wextra)
+    target_compile_options(${LIB_NAME} PRIVATE -Wall -Wextra -g3 -gdwarf-4)
 endfunction()
 
 target_include_directories(bsp PRIVATE

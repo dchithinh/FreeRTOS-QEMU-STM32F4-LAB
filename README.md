@@ -48,7 +48,8 @@ Numeric id is `01` … `28`. The script resolves `labs/NN-*`.
 | `./scripts/lab.sh qemu NN` | Build learner `src/` firmware and run QEMU (UART on stdio) |
 | `./scripts/lab.sh solution NN` | Build `solution/` firmware and run QEMU |
 | `./scripts/lab.sh check NN` | **Phase 1 only:** UART output vs `expected.log` (solution build) |
-| `./scripts/lab.sh gdb NN` | QEMU with `-s -S`, then attach GDB; see lab README for breakpoints |
+| `./scripts/lab.sh gdb NN` | QEMU with `-s -S`, then attach GDB on learner `src/`; see lab README for breakpoints |
+| `./scripts/lab.sh gdb-solution NN` | Same, but debug the `solution/` firmware |
 
 Equivalent CMake: `cmake --build build --target qemu-01`, `qemu-01-solution`, `check-01`, etc.
 
@@ -74,6 +75,31 @@ Headers: `bsp/uart.h`, `bsp/irq.h`.
 - **Never call a non-`FromISR` API from an ISR** (labs 14–15 show the failure).
 - **Do not block in a timer callback** (lab 21): the timer daemon task serves every timer.
 - **Do not define `SysTick_Handler`** — the FreeRTOS port owns SysTick.
+
+## Debug mode (GDB)
+
+Every target — learner `src/` and `solution/` — is built with **`-g3 -gdwarf-4`**, and CMake defaults to `CMAKE_BUILD_TYPE=Debug` (still `-O0`, so timing-sensitive labs behave the same). Source lines, locals, and kernel symbols are all available:
+
+```bash
+./scripts/lab.sh gdb 01            # breakpoints in labs/01-tasks/src/app.c
+./scripts/lab.sh gdb-solution 01   # breakpoints in labs/01-tasks/solution/app.c
+```
+
+That starts QEMU with `-s -S` and attaches `gdb-multiarch`. Useful commands:
+
+```gdb
+break paused
+continue
+info locals
+print xTickCount
+```
+
+Outside `lab.sh`, use the resolved QEMU (the PATH one on Ubuntu 20.04 is 4.2 and has no `netduinoplus2`):
+
+```bash
+.tools/bin/qemu-system-arm -M netduinoplus2 -display none -serial stdio -s -S \
+  -kernel build/lab_01_solution
+```
 
 ## Lab index (28 labs)
 

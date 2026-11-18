@@ -8,7 +8,7 @@ if [[ ! -f "$KERNEL_TASKS" ]]; then
   exit 1
 fi
 if [[ $# -lt 2 ]]; then
-  echo "usage: $0 qemu|solution|check|gdb NN" >&2
+  echo "usage: $0 qemu|solution|check|gdb|gdb-solution NN" >&2
   exit 1
 fi
 CMD=$1
@@ -30,11 +30,16 @@ case $CMD in
   qemu)     cmake --build "$ROOT/build" --target "qemu-${ID}" ;;
   solution) cmake --build "$ROOT/build" --target "qemu-${ID}-solution" ;;
   check)    cmake --build "$ROOT/build" --target "check-${ID}" ;;
-  gdb)
-    cmake --build "$ROOT/build" --target "lab_${ID}"
-    ELF=$(find "$ROOT/build" \( -name "lab_${ID}" -o -name "lab_${ID}.elf" \) -type f | head -1)
+  gdb|gdb-solution)
+    if [[ $CMD == gdb-solution ]]; then
+      TARGET="lab_${ID}_solution"
+    else
+      TARGET="lab_${ID}"
+    fi
+    cmake --build "$ROOT/build" --target "$TARGET"
+    ELF=$(find "$ROOT/build" -name "$TARGET" -type f | head -1)
     if [[ -z "$ELF" ]]; then
-      echo "ELF not found for lab_${ID}" >&2
+      echo "ELF not found for $TARGET" >&2
       exit 1
     fi
     "$QEMU" -M "$FREERTOS_QEMU_MACHINE" -display none -serial stdio -s -S -kernel "$ELF" &
@@ -43,5 +48,5 @@ case $CMD in
     GDB=$(command -v gdb-multiarch || command -v arm-none-eabi-gdb)
     "$GDB" -ex "target remote :1234" "$ELF"
     ;;
-  *) echo "usage: $0 qemu|solution|check|gdb NN" >&2; exit 1 ;;
+  *) echo "usage: $0 qemu|solution|check|gdb|gdb-solution NN" >&2; exit 1 ;;
 esac

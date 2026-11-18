@@ -1,6 +1,7 @@
 .worktrees/
 .tools/
 build/
+build-dbg/
 .cache/
 *.elf
 *.bin

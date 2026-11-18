@@ -14,6 +14,7 @@ function(add_freertos_lab ID SLUG)
 
     target_include_directories(lab_${ID} PRIVATE ${LAB_DIR} ${CMAKE_SOURCE_DIR}/bsp/include)
     target_link_libraries(lab_${ID} PRIVATE freertos_kernel_lab_${ID} bsp)
+    target_compile_options(lab_${ID} PRIVATE -g3 -gdwarf-4)
     target_link_options(lab_${ID} PRIVATE -T${CMAKE_SOURCE_DIR}/bsp/linker.ld
             "-Wl,-Map=$<TARGET_FILE_DIR:lab_${ID}>/lab_${ID}.map")
 
@@ -24,6 +25,7 @@ function(add_freertos_lab ID SLUG)
     target_include_directories(lab_${ID}_solution PRIVATE
             ${SOLUTION_APP_INCLUDES} ${CMAKE_SOURCE_DIR}/bsp/include)
     target_link_libraries(lab_${ID}_solution PRIVATE freertos_kernel_lab_${ID}_solution bsp)
+    target_compile_options(lab_${ID}_solution PRIVATE -g3 -gdwarf-4)
     target_link_options(lab_${ID}_solution PRIVATE -T${CMAKE_SOURCE_DIR}/bsp/linker.ld
             "-Wl,-Map=$<TARGET_FILE_DIR:lab_${ID}_solution>/lab_${ID}_solution.map")
 
