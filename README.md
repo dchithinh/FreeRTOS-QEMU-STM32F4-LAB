@@ -58,8 +58,9 @@ Equivalent CMake: `cmake --build build --target qemu-01`, `qemu-01-solution`, `c
 | API | Role |
 |-----|------|
 | `uart_init()` | Enable USART1 for QEMU stdio |
-| `uart_puts(const char *s)` | Blocking UART string (critical section around TX) |
+| `uart_puts(const char *s)` | Blocking UART string (critical section around TX); **adds a `[   ms] ` prefix at each line start** |
 | `uart_printf(const char *fmt, …)` | Tiny formatted output via `uart_puts` |
+| `uart_timestamp_enable(int on)` | `0` disables the timestamp prefix, `1` re-enables |
 | `bsp_irq_init(uint32_t nvic_priority)` | Enable the dedicated lab IRQ at NVIC priority |
 | `bsp_irq_pend(void)` | Pend that IRQ from a task (QEMU enters the handler) |
 | `void BSP_IRQHandler(void)` | **Implement in `app.c`** for ISR labs (`FromISR`, `portYIELD_FROM_ISR`) |
@@ -67,6 +68,31 @@ Equivalent CMake: `cmake --build build --target qemu-01`, `qemu-01-solution`, `c
 You may also use CMSIS **`NVIC_*`** and **`IRQn_Type`** (e.g. lab 15). **Do not** call STM32Cube HAL or define `SysTick_Handler` (the FreeRTOS port owns SysTick).
 
 Headers: `bsp/uart.h`, `bsp/irq.h`.
+
+## Timestamped UART output
+
+`uart_puts` prefixes **every line** with the kernel tick count converted to milliseconds:
+
+```
+[     0] low
+[     2] high
+[     3] resumed
+[     3] DONE
+```
+
+- Format is `[` + ms right-aligned in 6 columns + `] `. It is emitted once per line, even when a lab prints the text and the `\r\n` in two separate `uart_puts` calls (lab 09 does that).
+- The value comes from `xTaskGetTickCount()`, so it shows **scheduler time**, not host wall-clock — that is what makes race/starvation/timing labs readable.
+- Tick rate is read from the live SysTick reload, so labs that change `configTICK_RATE_HZ` (lab 24 runs at 100 Hz) still print correct milliseconds.
+- Turn it off for plain output:
+
+```c
+uart_timestamp_enable(0);
+uart_puts("no prefix here\r\n");
+```
+
+`./scripts/lab.sh check NN` strips the prefix before diffing, so `expected.log` stays free of timestamps.
+
+The overflow/malloc hooks bypass `uart_puts` (they write USART1 registers directly, because they run in scheduler context where critical sections are illegal), so hook lines such as `HOOK STACK_OVERFLOW` have **no** timestamp.
 
 ## Rules that break the kernel
 
